@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gmail Viewer - メール一覧</title>
+    <div th:replace="~{fragments/common-css :: commonCss}"></div>
+</head>
+<body>
+    <div th:replace="~{fragments/header :: header}"></div>
+    
+    <main class="container mt-4">
+        <div class="row">
+            <div class="col-md-12">
+                <h2 class="mb-4">
+                    <i class="fas fa-envelope"></i> メール一覧
+                </h2>
+                
+                <!-- API設定状況表示 -->
+                <div th:if="${!apiAvailable}" class="alert alert-warning" role="alert">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Gmail API未設定</strong><br>
+                    Gmail APIの設定が完了していません。サンプルデータを表示しています。<br>
+                    <a th:href="@{/gmail/setup}" class="alert-link">設定方法を確認する</a>
+                </div>
+                
+                <div th:if="${apiAvailable}" class="alert alert-success" role="alert">
+                    <i class="fas fa-check-circle"></i>
+                    <strong>Gmail API設定済み</strong> - 実際のメールデータを表示しています
+                </div>
+                
+                <!-- エラーメッセージ表示 -->
+                <div th:if="${error}" class="alert alert-danger" role="alert">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span th:text="${error}"></span>
+                </div>
+                
+                <!-- メール一覧テーブル -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-list"></i> 受信メール
+                            <span class="badge bg-primary ms-2" th:text="${#lists.size(emails)}">0</span>
+                        </h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div th:if="${#lists.isEmpty(emails)}" class="text-center p-4">
+                            <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">メールがありません</p>
+                        </div>
+                        
+                        <div th:unless="${#lists.isEmpty(emails)}" class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th scope="col" style="width: 20%;">送信者</th>
+                                        <th scope="col" style="width: 30%;">件名</th>
+                                        <th scope="col" style="width: 35%;">プレビュー</th>
+                                        <th scope="col" style="width: 15%;">日時</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="email : ${emails}" class="email-row" style="cursor: pointer;">
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2" 
+                                                     style="width: 32px; height: 32px; font-size: 14px;">
+                                                    <span th:text="${#strings.substring(email.sender != null ? email.sender : 'U', 0, 1)}">U</span>
+                                                </div>
+                                                <div>
+                                                    <span th:text="${email.sender ?: 'Unknown'}" class="fw-medium"></span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span th:text="${email.subject ?: '(件名なし)'}" class="fw-medium"></span>
+                                        </td>
+                                        <td>
+                                            <span th:text="${#strings.length(email.snippet ?: '') > 60 ? #strings.substring(email.snippet, 0, 60) + '...' : (email.snippet ?: '')}" 
+                                                  class="text-muted small"></span>
+                                        </td>
+                                        <td>
+                                            <small class="text-muted" th:text="${email.date ?: ''}"></small>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 操作ボタン -->
+                <div class="mt-4">
+                    <a th:href="@{/gmail/mails}" class="btn btn-primary">
+                        <i class="fas fa-sync-alt"></i> 更新
+                    </a>
+                    <a th:href="@{/gmail/setup}" class="btn btn-outline-secondary">
+                        <i class="fas fa-cog"></i> 設定
+                    </a>
+                    <a th:href="@{/}" class="btn btn-outline-primary">
+                        <i class="fas fa-home"></i> ホームに戻る
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <div th:replace="~{fragments/footer :: footer}"></div>
+    
+    <script>
+        // メール行のクリックイベント（将来の詳細表示用）
+        document.querySelectorAll('.email-row').forEach(row => {
+            row.addEventListener('click', function() {
+                console.log('メール詳細表示機能は今後実装予定です');
+            });
+        });
+    </script>
+</body>
+</html>
