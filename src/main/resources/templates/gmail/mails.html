@@ -17,6 +17,12 @@
                 </h2>
                 
                 <!-- API設定状況表示 -->
+                <div th:if="${authSuccess}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle"></i>
+                    <strong>認証成功!</strong> Googleアカウントで正常に認証されました。
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                
                 <div th:if="${!apiAvailable}" class="alert alert-warning" role="alert">
                     <i class="fas fa-exclamation-triangle"></i>
                     <strong>Gmail API未設定</strong><br>
@@ -24,9 +30,23 @@
                     <a th:href="@{/gmail/setup}" class="alert-link">設定方法を確認する</a>
                 </div>
                 
-                <div th:if="${apiAvailable}" class="alert alert-success" role="alert">
+                <div th:if="${apiAvailable and !authenticated}" class="alert alert-info" role="alert">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>Google認証が必要</strong><br>
+                    Gmail APIは設定済みですが、Googleアカウントでの認証が必要です。サンプルデータを表示しています。<br>
+                    <a th:href="@{/oauth2/authorize}" class="alert-link">
+                        <i class="fab fa-google"></i> Googleで認証する
+                    </a>
+                </div>
+                
+                <div th:if="${apiAvailable and authenticated}" class="alert alert-success" role="alert">
                     <i class="fas fa-check-circle"></i>
-                    <strong>Gmail API設定済み</strong> - 実際のメールデータを表示しています
+                    <strong>Gmail API認証済み</strong> - 実際のメールデータを表示しています
+                    <div class="mt-2">
+                        <a th:href="@{/oauth2/logout}" class="btn btn-sm btn-outline-danger">
+                            <i class="fas fa-sign-out-alt"></i> ログアウト
+                        </a>
+                    </div>
                 </div>
                 
                 <!-- エラーメッセージ表示 -->
@@ -93,6 +113,9 @@
                 <div class="mt-4">
                     <a th:href="@{/gmail/mails}" class="btn btn-primary">
                         <i class="fas fa-sync-alt"></i> 更新
+                    </a>
+                    <a th:if="${apiAvailable and !authenticated}" th:href="@{/oauth2/authorize}" class="btn btn-success">
+                        <i class="fab fa-google"></i> Googleで認証
                     </a>
                     <a th:href="@{/gmail/setup}" class="btn btn-outline-secondary">
                         <i class="fas fa-cog"></i> 設定

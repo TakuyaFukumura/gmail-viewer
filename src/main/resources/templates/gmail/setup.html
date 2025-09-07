@@ -17,9 +17,29 @@
                 </h2>
                 
                 <!-- 設定状況表示 -->
-                <div th:if="${apiAvailable}" class="alert alert-success" role="alert">
+                <div th:if="${error}" class="alert alert-danger" role="alert">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <strong>エラー:</strong> <span th:text="${error}"></span>
+                </div>
+                
+                <div th:if="${apiAvailable and authenticated}" class="alert alert-success" role="alert">
                     <i class="fas fa-check-circle"></i>
-                    <strong>設定完了</strong> - Gmail APIが正常に設定されています
+                    <strong>認証完了</strong> - Gmail APIが正常に設定され、認証も完了しています
+                    <div class="mt-2">
+                        <a th:href="@{/oauth2/logout}" class="btn btn-sm btn-outline-danger">
+                            <i class="fas fa-sign-out-alt"></i> ログアウト
+                        </a>
+                    </div>
+                </div>
+                
+                <div th:if="${apiAvailable and !authenticated}" class="alert alert-info" role="alert">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>認証が必要</strong> - Gmail APIの設定は完了していますが、Google認証が必要です
+                    <div class="mt-2">
+                        <a th:href="@{/oauth2/authorize}" class="btn btn-success">
+                            <i class="fab fa-google"></i> Googleで認証
+                        </a>
+                    </div>
                 </div>
                 
                 <div th:unless="${apiAvailable}" class="alert alert-warning" role="alert">

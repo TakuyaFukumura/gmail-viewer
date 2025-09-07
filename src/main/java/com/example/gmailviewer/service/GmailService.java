@@ -1,18 +1,12 @@
 package com.example.gmailviewer.service;
 
-import com.example.gmailviewer.config.GmailConfig;
 import com.example.gmailviewer.config.GoogleOAuthConfig;
 import com.google.api.client.auth.oauth2.Credential;
-import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
-import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
-import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
-import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.googleapis.json.GoogleJsonError;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
-import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.gmail.Gmail;
 import com.google.api.services.gmail.model.ListMessagesResponse;
 import com.google.api.services.gmail.model.Message;
@@ -20,10 +14,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.io.ByteArrayInputStream;
+import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +29,7 @@ import java.util.List;
 public class GmailService {
 
     private final GoogleOAuthConfig oauthConfig;
-    private final GmailConfig gmailConfig;
+    private final OAuthService oauthService;
     
     private static final String APPLICATION_NAME = "Gmail Viewer";
     private static final GsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
@@ -45,35 +37,18 @@ public class GmailService {
     /**
      * Gmail APIクライアントを作成
      * 
+     * @param session HTTPセッション
      * @return Gmail APIクライアント
      * @throws IOException
      * @throws GeneralSecurityException
      */
-    private Gmail createGmailService() throws IOException, GeneralSecurityException {
+    private Gmail createGmailService(HttpSession session) throws IOException, GeneralSecurityException {
         final NetHttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
         
-        // クライアント認証情報をJSON形式で作成
-        String clientSecretsJson = String.format(
-            "{\"installed\":{\"client_id\":\"%s\",\"client_secret\":\"%s\",\"redirect_uris\":[\"%s\"]}}",
-            oauthConfig.getClientId(),
-            oauthConfig.getClientSecret(),
-            oauthConfig.getRedirectUri()
-        );
-        
-        GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(
-            JSON_FACTORY, 
-            new InputStreamReader(new ByteArrayInputStream(clientSecretsJson.getBytes(StandardCharsets.UTF_8)))
-        );
-
-        // OAuth 2.0認証フローを構築
-        GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
-                httpTransport, JSON_FACTORY, clientSecrets, gmailConfig.getScopes())
-                .setDataStoreFactory(new FileDataStoreFactory(new java.io.File("tokens")))
-                .setAccessType("offline")
-                .build();
-
-        LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(8888).build();
-        Credential credential = new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
+        Credential credential = oauthService.getCredential(session);
+        if (credential == null) {
+            throw new IllegalStateException("OAuth認証が必要です");
+        }
 
         return new Gmail.Builder(httpTransport, JSON_FACTORY, credential)
                 .setApplicationName(APPLICATION_NAME)
@@ -103,16 +78,22 @@ public class GmailService {
     /**
      * メール一覧を取得（最新10件）
      * 
+     * @param session HTTPセッション
      * @return メール一覧
      */
-    public List<EmailSummary> getEmailList() {
+    public List<EmailSummary> getEmailList(HttpSession session) {
         if (!isGmailApiAvailable()) {
             log.warn("Gmail APIが利用できません。サンプルデータを返します。");
             return getSampleEmails();
         }
 
+        if (!oauthService.isAuthenticated(session)) {
+            log.warn("OAuth認証が必要です。サンプルデータを返します。");
+            return getSampleEmails();
+        }
+
         try {
-            Gmail service = createGmailService();
+            Gmail service = createGmailService(session);
             String user = "me";
             
             ListMessagesResponse response = service.users().messages().list(user)
@@ -141,6 +122,16 @@ public class GmailService {
             log.error("メール一覧取得中にエラーが発生しました", e);
             return getSampleEmails();
         }
+    }
+
+    /**
+     * メール一覧を取得（セッションなし、下位互換性のため）
+     * 
+     * @return サンプルメール一覧
+     */
+    public List<EmailSummary> getEmailList() {
+        log.warn("セッションなしでメール一覧が要求されました。サンプルデータを返します。");
+        return getSampleEmails();
     }
 
     /**
