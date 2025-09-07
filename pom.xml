@@ -4,8 +4,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.example</groupId>
-    <artifactId>myproject</artifactId>
-    <version>0.17.0</version>
+    <artifactId>gmail-viewer</artifactId>
+    <version>0.1.0</version>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
@@ -70,6 +70,24 @@
             <artifactId>spring-boot-starter-webflux</artifactId>
         </dependency>
         <dependency>
+            <!-- Google API Client：Gmail API接続用クライアント -->
+            <groupId>com.google.api-client</groupId>
+            <artifactId>google-api-client</artifactId>
+            <version>2.4.0</version>
+        </dependency>
+        <dependency>
+            <!-- Google OAuth Client：OAuth 2.0認証用クライアント -->
+            <groupId>com.google.oauth-client</groupId>
+            <artifactId>google-oauth-client</artifactId>
+            <version>1.34.1</version>
+        </dependency>
+        <dependency>
+            <!-- Gmail API Services：Gmail API Java バインディング -->
+            <groupId>com.google.apis</groupId>
+            <artifactId>google-api-services-gmail</artifactId>
+            <version>v1-rev20220404-2.0.0</version>
+        </dependency>
+        <dependency>
             <!-- Groovy：動的プログラミング言語 -->
             <groupId>org.apache.groovy</groupId>
             <artifactId>groovy</artifactId>
@@ -99,7 +117,7 @@
     </dependencies>
 
     <build>
-        <finalName>myproject</finalName>
+        <finalName>gmail-viewer</finalName>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
