@@ -147,6 +147,9 @@ public class GmailService {
                     case "date":
                         summary.setDate(header.getValue());
                         break;
+                    default:
+                        // 他のヘッダーは無視
+                        break;
                 }
             });
         }
