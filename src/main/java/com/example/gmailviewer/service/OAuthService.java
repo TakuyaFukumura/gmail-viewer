@@ -43,8 +43,6 @@ public class OAuthService {
      *
      * @param session HTTPセッション
      * @return 認証URL
-     * @throws IOException
-     * @throws GeneralSecurityException
      */
     public String getAuthorizationUrl(HttpSession session) throws IOException, GeneralSecurityException {
         // CSRF攻撃防止用のstate値を生成
@@ -69,8 +67,6 @@ public class OAuthService {
      * @param state   CSRF攻撃防止用のstate値
      * @param session HTTPセッション
      * @return 認証成功の場合true
-     * @throws IOException
-     * @throws GeneralSecurityException
      */
     public boolean handleAuthorizationCallback(String code, String state, HttpSession session)
             throws IOException, GeneralSecurityException {
@@ -132,8 +128,6 @@ public class OAuthService {
      * GoogleAuthorizationCodeFlowを作成
      *
      * @return GoogleAuthorizationCodeFlow
-     * @throws IOException
-     * @throws GeneralSecurityException
      */
     private GoogleAuthorizationCodeFlow createAuthorizationCodeFlow()
             throws IOException, GeneralSecurityException {

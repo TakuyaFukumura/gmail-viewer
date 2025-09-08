@@ -11,7 +11,9 @@ import com.google.api.services.gmail.Gmail;
 import com.google.api.services.gmail.model.ListMessagesResponse;
 import com.google.api.services.gmail.model.Message;
 import jakarta.servlet.http.HttpSession;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -38,8 +40,6 @@ public class GmailService {
      *
      * @param session HTTPセッション
      * @return Gmail APIクライアント
-     * @throws IOException
-     * @throws GeneralSecurityException
      */
     private Gmail createGmailService(HttpSession session) throws IOException, GeneralSecurityException {
         final NetHttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
@@ -124,16 +124,6 @@ public class GmailService {
     }
 
     /**
-     * メール一覧を取得（セッションなし、下位互換性のため）
-     *
-     * @return サンプルメール一覧
-     */
-    public List<EmailSummary> getEmailList() {
-        log.warn("セッションなしでメール一覧が要求されました。サンプルデータを返します。");
-        return getSampleEmails();
-    }
-
-    /**
      * メッセージからEmailSummaryを作成
      *
      * @param message Gmail Message
@@ -206,6 +196,8 @@ public class GmailService {
     /**
      * メールサマリー情報を格納するクラス
      */
+    @Setter
+    @Getter
     public static class EmailSummary {
         private String id;
         private String threadId;
@@ -213,54 +205,5 @@ public class GmailService {
         private String sender;
         private String date;
         private String snippet;
-
-        // getters and setters
-        public String getId() {
-            return id;
-        }
-
-        public void setId(String id) {
-            this.id = id;
-        }
-
-        public String getThreadId() {
-            return threadId;
-        }
-
-        public void setThreadId(String threadId) {
-            this.threadId = threadId;
-        }
-
-        public String getSubject() {
-            return subject;
-        }
-
-        public void setSubject(String subject) {
-            this.subject = subject;
-        }
-
-        public String getSender() {
-            return sender;
-        }
-
-        public void setSender(String sender) {
-            this.sender = sender;
-        }
-
-        public String getDate() {
-            return date;
-        }
-
-        public void setDate(String date) {
-            this.date = date;
-        }
-
-        public String getSnippet() {
-            return snippet;
-        }
-
-        public void setSnippet(String snippet) {
-            this.snippet = snippet;
-        }
     }
 }
