@@ -36,6 +36,28 @@ public class AiService {
     }
 
     /**
+     * Gemini API用のリクエストボディを生成する
+     *
+     * @return Gemini APIに送信するリクエストボディ（Map形式）
+     */
+    private static Map<String, Object> createGeminiRequestBody() {
+        String prompt = "100文字程度の日本語で豆知識を教えてください。";
+
+        // Gemini API リクエストボディの構築
+        return Map.of(
+                "contents", new Object[]{
+                        Map.of("parts", new Object[]{
+                                Map.of("text", prompt)
+                        })
+                },
+                "generationConfig", Map.of(
+                        "temperature", 2.0, // 値が大きいとAI応答がランダムになる：設定幅 0.0 ~ 2.0
+                        "maxOutputTokens", 200
+                )
+        );
+    }
+
+    /**
      * Gemini APIを使用して豆知識を取得する
      *
      * @return 豆知識の文字列
@@ -70,28 +92,6 @@ public class AiService {
             logger.error("Gemini API呼び出しで予期しないエラーが発生", e);
             throw new RuntimeException("API呼び出しで予期しないエラーが発生しました。");
         }
-    }
-
-    /**
-     * Gemini API用のリクエストボディを生成する
-     *
-     * @return Gemini APIに送信するリクエストボディ（Map形式）
-     */
-    private static Map<String, Object> createGeminiRequestBody() {
-        String prompt = "100文字程度の日本語で豆知識を教えてください。";
-
-        // Gemini API リクエストボディの構築
-        return Map.of(
-                "contents", new Object[]{
-                        Map.of("parts", new Object[]{
-                                Map.of("text", prompt)
-                        })
-                },
-                "generationConfig", Map.of(
-                        "temperature", 2.0, // 値が大きいとAI応答がランダムになる：設定幅 0.0 ~ 2.0
-                        "maxOutputTokens", 200
-                )
-        );
     }
 
     /**

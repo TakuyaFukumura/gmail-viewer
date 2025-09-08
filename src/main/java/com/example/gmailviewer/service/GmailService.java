@@ -10,11 +10,11 @@ import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.gmail.Gmail;
 import com.google.api.services.gmail.model.ListMessagesResponse;
 import com.google.api.services.gmail.model.Message;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
@@ -28,15 +28,14 @@ import java.util.List;
 @Slf4j
 public class GmailService {
 
-    private final GoogleOAuthConfig oauthConfig;
-    private final OAuthService oauthService;
-    
     private static final String APPLICATION_NAME = "Gmail Viewer";
     private static final GsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
+    private final GoogleOAuthConfig oauthConfig;
+    private final OAuthService oauthService;
 
     /**
      * Gmail APIクライアントを作成
-     * 
+     *
      * @param session HTTPセッション
      * @return Gmail APIクライアント
      * @throws IOException
@@ -44,7 +43,7 @@ public class GmailService {
      */
     private Gmail createGmailService(HttpSession session) throws IOException, GeneralSecurityException {
         final NetHttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
-        
+
         Credential credential = oauthService.getCredential(session);
         if (credential == null) {
             throw new IllegalStateException("OAuth認証が必要です");
@@ -57,14 +56,14 @@ public class GmailService {
 
     /**
      * Gmail APIサービスが利用可能かチェック
-     * 
+     *
      * @return 利用可能な場合true
      */
     public boolean isGmailApiAvailable() {
         try {
             // 必要な設定がすべて存在するかチェック
             if (oauthConfig.getClientId() == null || oauthConfig.getClientId().equals("your-client-id-here") ||
-                oauthConfig.getClientSecret() == null || oauthConfig.getClientSecret().equals("your-client-secret-here")) {
+                    oauthConfig.getClientSecret() == null || oauthConfig.getClientSecret().equals("your-client-secret-here")) {
                 log.warn("Gmail API設定が不完全です。GOOGLE_CLIENT_IDとGOOGLE_CLIENT_SECRETを設定してください。");
                 return false;
             }
@@ -77,7 +76,7 @@ public class GmailService {
 
     /**
      * メール一覧を取得（最新10件）
-     * 
+     *
      * @param session HTTPセッション
      * @return メール一覧
      */
@@ -95,14 +94,14 @@ public class GmailService {
         try {
             Gmail service = createGmailService(session);
             String user = "me";
-            
+
             ListMessagesResponse response = service.users().messages().list(user)
                     .setMaxResults(10L)
                     .execute();
-            
+
             List<Message> messages = response.getMessages();
             List<EmailSummary> emailSummaries = new ArrayList<>();
-            
+
             if (messages != null) {
                 for (Message message : messages) {
                     try {
@@ -115,9 +114,9 @@ public class GmailService {
                     }
                 }
             }
-            
+
             return emailSummaries;
-            
+
         } catch (IOException | GeneralSecurityException e) {
             log.error("メール一覧取得中にエラーが発生しました", e);
             return getSampleEmails();
@@ -126,7 +125,7 @@ public class GmailService {
 
     /**
      * メール一覧を取得（セッションなし、下位互換性のため）
-     * 
+     *
      * @return サンプルメール一覧
      */
     public List<EmailSummary> getEmailList() {
@@ -136,7 +135,7 @@ public class GmailService {
 
     /**
      * メッセージからEmailSummaryを作成
-     * 
+     *
      * @param message Gmail Message
      * @return EmailSummary
      */
@@ -144,7 +143,7 @@ public class GmailService {
         EmailSummary summary = new EmailSummary();
         summary.setId(message.getId());
         summary.setThreadId(message.getThreadId());
-        
+
         if (message.getPayload() != null && message.getPayload().getHeaders() != null) {
             message.getPayload().getHeaders().forEach(header -> {
                 switch (header.getName().toLowerCase()) {
@@ -160,23 +159,23 @@ public class GmailService {
                 }
             });
         }
-        
+
         // メール本文のスニペットを設定
         if (message.getSnippet() != null) {
             summary.setSnippet(message.getSnippet());
         }
-        
+
         return summary;
     }
 
     /**
      * サンプルメールデータを生成（APIが利用できない場合）
-     * 
+     *
      * @return サンプルメール一覧
      */
     private List<EmailSummary> getSampleEmails() {
         List<EmailSummary> samples = new ArrayList<>();
-        
+
         EmailSummary sample1 = new EmailSummary();
         sample1.setId("sample1");
         sample1.setSubject("Gmail Viewerへようこそ");
@@ -184,7 +183,7 @@ public class GmailService {
         sample1.setDate("2025-01-07 14:00:00");
         sample1.setSnippet("Gmail APIの設定が完了したら、実際のメールが表示されます。GOOGLE_CLIENT_IDとGOOGLE_CLIENT_SECRETを環境変数で設定してください。");
         samples.add(sample1);
-        
+
         EmailSummary sample2 = new EmailSummary();
         sample2.setId("sample2");
         sample2.setSubject("設定方法について");
@@ -192,7 +191,7 @@ public class GmailService {
         sample2.setDate("2025-01-07 13:30:00");
         sample2.setSnippet("1. Google Cloud Consoleでプロジェクトを作成 2. Gmail APIを有効化 3. OAuth 2.0クライアントIDを作成 4. 環境変数を設定");
         samples.add(sample2);
-        
+
         EmailSummary sample3 = new EmailSummary();
         sample3.setId("sample3");
         sample3.setSubject("サンプルメール3");
@@ -200,7 +199,7 @@ public class GmailService {
         sample3.setDate("2025-01-07 12:00:00");
         sample3.setSnippet("これはサンプルメールです。実際のGmail APIが設定されると、本物のメールが表示されます。");
         samples.add(sample3);
-        
+
         return samples;
     }
 
@@ -216,22 +215,52 @@ public class GmailService {
         private String snippet;
 
         // getters and setters
-        public String getId() { return id; }
-        public void setId(String id) { this.id = id; }
-        
-        public String getThreadId() { return threadId; }
-        public void setThreadId(String threadId) { this.threadId = threadId; }
-        
-        public String getSubject() { return subject; }
-        public void setSubject(String subject) { this.subject = subject; }
-        
-        public String getSender() { return sender; }
-        public void setSender(String sender) { this.sender = sender; }
-        
-        public String getDate() { return date; }
-        public void setDate(String date) { this.date = date; }
-        
-        public String getSnippet() { return snippet; }
-        public void setSnippet(String snippet) { this.snippet = snippet; }
+        public String getId() {
+            return id;
+        }
+
+        public void setId(String id) {
+            this.id = id;
+        }
+
+        public String getThreadId() {
+            return threadId;
+        }
+
+        public void setThreadId(String threadId) {
+            this.threadId = threadId;
+        }
+
+        public String getSubject() {
+            return subject;
+        }
+
+        public void setSubject(String subject) {
+            this.subject = subject;
+        }
+
+        public String getSender() {
+            return sender;
+        }
+
+        public void setSender(String sender) {
+            this.sender = sender;
+        }
+
+        public String getDate() {
+            return date;
+        }
+
+        public void setDate(String date) {
+            this.date = date;
+        }
+
+        public String getSnippet() {
+            return snippet;
+        }
+
+        public void setSnippet(String snippet) {
+            this.snippet = snippet;
+        }
     }
 }

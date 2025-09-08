@@ -2,6 +2,7 @@ package com.example.gmailviewer.controller;
 
 import com.example.gmailviewer.config.GoogleOAuthConfig;
 import com.example.gmailviewer.service.OAuthService;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -9,8 +10,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.view.RedirectView;
-
-import jakarta.servlet.http.HttpSession;
 
 /**
  * OAuth 2.0認証処理用コントローラー
@@ -26,14 +25,14 @@ public class OAuthController {
 
     /**
      * Google OAuth認証を開始
-     * 
+     *
      * @param session HTTPセッション
      * @return Google認証ページへのリダイレクト
      */
     @GetMapping("/authorize")
     public RedirectView authorize(HttpSession session) {
         log.info("OAuth認証を開始します");
-        
+
         try {
             String authorizationUrl = oauthService.getAuthorizationUrl(session);
             log.info("認証URLを生成しました: {}", authorizationUrl);
@@ -47,10 +46,10 @@ public class OAuthController {
 
     /**
      * OAuth認証コールバック処理
-     * 
-     * @param code Googleから返される認証コード
-     * @param state CSRF攻撃防止用のstate値
-     * @param error エラーパラメータ（認証拒否時など）
+     *
+     * @param code    Googleから返される認証コード
+     * @param state   CSRF攻撃防止用のstate値
+     * @param error   エラーパラメータ（認証拒否時など）
      * @param session HTTPセッション
      * @return メール一覧ページまたはエラーページへのリダイレクト
      */
@@ -60,8 +59,8 @@ public class OAuthController {
             @RequestParam(value = "state", required = false) String state,
             @RequestParam(value = "error", required = false) String error,
             HttpSession session) {
-        
-        log.info("OAuth認証コールバックを受信しました. code={}, error={}", 
+
+        log.info("OAuth認証コールバックを受信しました. code={}, error={}",
                 code != null ? "存在" : "なし", error);
 
         // エラーパラメータがある場合（ユーザーが認証を拒否した場合など）
@@ -83,7 +82,7 @@ public class OAuthController {
         try {
             // 認証コードをアクセストークンに交換
             boolean success = oauthService.handleAuthorizationCallback(code, state, session);
-            
+
             if (success) {
                 log.info("OAuth認証が正常に完了しました");
                 return new RedirectView("/gmail/mails?auth=success");
@@ -91,7 +90,7 @@ public class OAuthController {
                 log.error("OAuth認証処理に失敗しました");
                 return new RedirectView("/gmail/setup?error=token_exchange_failed");
             }
-            
+
         } catch (Exception e) {
             log.error("OAuth認証コールバック処理中にエラーが発生しました", e);
             return new RedirectView("/gmail/setup?error=callback_error");
@@ -100,14 +99,14 @@ public class OAuthController {
 
     /**
      * OAuth認証をリセット（ログアウト）
-     * 
+     *
      * @param session HTTPセッション
      * @return ホームページへのリダイレクト
      */
     @GetMapping("/logout")
     public RedirectView logout(HttpSession session) {
         log.info("OAuth認証をリセットします");
-        
+
         try {
             oauthService.clearCredentials(session);
             session.invalidate();

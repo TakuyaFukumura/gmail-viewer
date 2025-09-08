@@ -2,6 +2,7 @@ package com.example.gmailviewer.controller;
 
 import com.example.gmailviewer.service.GmailService;
 import com.example.gmailviewer.service.OAuthService;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -9,8 +10,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-
-import jakarta.servlet.http.HttpSession;
 
 /**
  * Gmail機能用コントローラー
@@ -26,31 +25,31 @@ public class GmailController {
 
     /**
      * メール一覧画面を表示
-     * 
-     * @param model ビューモデル
-     * @param session HTTPセッション
+     *
+     * @param model     ビューモデル
+     * @param session   HTTPセッション
      * @param authParam 認証成功パラメータ
      * @return メール一覧テンプレート名
      */
     @GetMapping("/mails")
     public String listEmails(Model model, HttpSession session,
-                            @RequestParam(value = "auth", required = false) String authParam) {
+                             @RequestParam(value = "auth", required = false) String authParam) {
         log.info("メール一覧画面への請求を受信しました");
-        
+
         // 認証成功メッセージを追加
         if ("success".equals(authParam)) {
             model.addAttribute("authSuccess", true);
         }
-        
+
         try {
             var emails = gmailService.getEmailList(session);
             model.addAttribute("emails", emails);
             model.addAttribute("apiAvailable", gmailService.isGmailApiAvailable());
             model.addAttribute("authenticated", oauthService.isAuthenticated(session));
-            
+
             log.info("取得したメール数: {}", emails.size());
             return "gmail/mails";
-            
+
         } catch (Exception e) {
             log.error("メール一覧取得中にエラーが発生しました", e);
             model.addAttribute("error", "メール一覧の取得に失敗しました: " + e.getMessage());
@@ -62,20 +61,20 @@ public class GmailController {
 
     /**
      * Gmail API設定画面を表示
-     * 
-     * @param model ビューモデル
-     * @param session HTTPセッション
+     *
+     * @param model      ビューモデル
+     * @param session    HTTPセッション
      * @param errorParam エラーパラメータ
      * @return 設定画面テンプレート名
      */
     @GetMapping("/setup")
     public String showSetup(Model model, HttpSession session,
-                           @RequestParam(value = "error", required = false) String errorParam) {
+                            @RequestParam(value = "error", required = false) String errorParam) {
         log.info("Gmail API設定画面への請求を受信しました");
-        
+
         model.addAttribute("apiAvailable", gmailService.isGmailApiAvailable());
         model.addAttribute("authenticated", oauthService.isAuthenticated(session));
-        
+
         // エラーメッセージを追加
         if (errorParam != null) {
             String errorMessage = switch (errorParam) {
@@ -89,7 +88,7 @@ public class GmailController {
             };
             model.addAttribute("error", errorMessage);
         }
-        
+
         return "gmail/setup";
     }
 }

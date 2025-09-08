@@ -11,11 +11,11 @@ import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.client.util.store.MemoryDataStoreFactory;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import jakarta.servlet.http.HttpSession;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -32,16 +32,15 @@ import java.util.Base64;
 @Slf4j
 public class OAuthService {
 
-    private final GoogleOAuthConfig oauthConfig;
-    private final GmailConfig gmailConfig;
-    
     private static final GsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
     private static final String SESSION_STATE_KEY = "oauth_state";
     private static final String SESSION_CREDENTIAL_KEY = "oauth_credential";
+    private final GoogleOAuthConfig oauthConfig;
+    private final GmailConfig gmailConfig;
 
     /**
      * OAuth認証URLを生成
-     * 
+     *
      * @param session HTTPセッション
      * @return 認証URL
      * @throws IOException
@@ -51,56 +50,56 @@ public class OAuthService {
         // CSRF攻撃防止用のstate値を生成
         String state = generateState();
         session.setAttribute(SESSION_STATE_KEY, state);
-        
+
         GoogleAuthorizationCodeFlow flow = createAuthorizationCodeFlow();
-        
+
         GoogleAuthorizationCodeRequestUrl authorizationUrl = flow.newAuthorizationUrl()
                 .setRedirectUri(oauthConfig.getRedirectUri())
                 .setState(state)
                 .setAccessType("offline")
                 .setApprovalPrompt("force"); // リフレッシュトークンを確実に取得
-        
+
         return authorizationUrl.build();
     }
 
     /**
      * 認証コールバック処理
-     * 
-     * @param code 認証コード
-     * @param state CSRF攻撃防止用のstate値
+     *
+     * @param code    認証コード
+     * @param state   CSRF攻撃防止用のstate値
      * @param session HTTPセッション
      * @return 認証成功の場合true
      * @throws IOException
      * @throws GeneralSecurityException
      */
-    public boolean handleAuthorizationCallback(String code, String state, HttpSession session) 
+    public boolean handleAuthorizationCallback(String code, String state, HttpSession session)
             throws IOException, GeneralSecurityException {
-        
+
         // state値を検証してCSRF攻撃を防止
         String sessionState = (String) session.getAttribute(SESSION_STATE_KEY);
         if (sessionState == null || !sessionState.equals(state)) {
             log.error("無効なstate値です. 期待値: {}, 受信値: {}", sessionState, state);
             return false;
         }
-        
+
         GoogleAuthorizationCodeFlow flow = createAuthorizationCodeFlow();
-        
+
         // 認証コードをアクセストークンに交換
         GoogleTokenResponse tokenResponse = flow.newTokenRequest(code)
                 .setRedirectUri(oauthConfig.getRedirectUri())
                 .execute();
-        
+
         // 認証情報をセッションに保存
         Credential credential = flow.createAndStoreCredential(tokenResponse, getUserId(session));
         session.setAttribute(SESSION_CREDENTIAL_KEY, credential);
-        
+
         log.info("OAuth認証が正常に完了しました. ユーザーID: {}", getUserId(session));
         return true;
     }
 
     /**
      * セッションから認証情報を取得
-     * 
+     *
      * @param session HTTPセッション
      * @return 認証情報（存在しない場合はnull）
      */
@@ -110,7 +109,7 @@ public class OAuthService {
 
     /**
      * 認証情報をクリア
-     * 
+     *
      * @param session HTTPセッション
      */
     public void clearCredentials(HttpSession session) {
@@ -120,7 +119,7 @@ public class OAuthService {
 
     /**
      * 認証済みかどうかをチェック
-     * 
+     *
      * @param session HTTPセッション
      * @return 認証済みの場合true
      */
@@ -131,27 +130,27 @@ public class OAuthService {
 
     /**
      * GoogleAuthorizationCodeFlowを作成
-     * 
+     *
      * @return GoogleAuthorizationCodeFlow
      * @throws IOException
      * @throws GeneralSecurityException
      */
-    private GoogleAuthorizationCodeFlow createAuthorizationCodeFlow() 
+    private GoogleAuthorizationCodeFlow createAuthorizationCodeFlow()
             throws IOException, GeneralSecurityException {
-        
+
         final NetHttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
-        
+
         // クライアント認証情報をJSON形式で作成
         String clientSecretsJson = String.format(
-            "{\"web\":{\"client_id\":\"%s\",\"client_secret\":\"%s\",\"redirect_uris\":[\"%s\"]}}",
-            oauthConfig.getClientId(),
-            oauthConfig.getClientSecret(),
-            oauthConfig.getRedirectUri()
+                "{\"web\":{\"client_id\":\"%s\",\"client_secret\":\"%s\",\"redirect_uris\":[\"%s\"]}}",
+                oauthConfig.getClientId(),
+                oauthConfig.getClientSecret(),
+                oauthConfig.getRedirectUri()
         );
-        
+
         GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(
-            JSON_FACTORY, 
-            new InputStreamReader(new ByteArrayInputStream(clientSecretsJson.getBytes(StandardCharsets.UTF_8)))
+                JSON_FACTORY,
+                new InputStreamReader(new ByteArrayInputStream(clientSecretsJson.getBytes(StandardCharsets.UTF_8)))
         );
 
         // メモリベースのデータストアを使用（セッション管理）
@@ -164,7 +163,7 @@ public class OAuthService {
 
     /**
      * セッションからユーザーIDを取得（セッションIDを使用）
-     * 
+     *
      * @param session HTTPセッション
      * @return ユーザーID
      */
@@ -174,7 +173,7 @@ public class OAuthService {
 
     /**
      * CSRF攻撃防止用のランダムstate値を生成
-     * 
+     *
      * @return state値
      */
     private String generateState() {
