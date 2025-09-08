@@ -1,4 +1,4 @@
-package com.example.gmailviewer.service;
+package com.example.gmailviewer.dto;
 
 import lombok.Data;
 

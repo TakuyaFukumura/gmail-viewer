@@ -1,6 +1,7 @@
 package com.example.gmailviewer.service;
 
 import com.example.gmailviewer.config.GoogleOAuthConfig;
+import com.example.gmailviewer.dto.EmailSummary;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.googleapis.json.GoogleJsonError;
