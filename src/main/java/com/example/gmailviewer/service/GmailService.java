@@ -126,16 +126,6 @@ public class GmailService {
     }
 
     /**
-     * メール一覧を取得（セッションなし、下位互換性のため）
-     *
-     * @return サンプルメール一覧
-     */
-    public List<EmailSummary> getEmailList() {
-        log.warn("セッションなしでメール一覧が要求されました。サンプルデータを返します。");
-        return getSampleEmails();
-    }
-
-    /**
      * メッセージからEmailSummaryを作成
      *
      * @param message Gmail Message
