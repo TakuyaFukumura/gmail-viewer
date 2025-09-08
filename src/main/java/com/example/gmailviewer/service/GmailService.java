@@ -1,6 +1,7 @@
 package com.example.gmailviewer.service;
 
 import com.example.gmailviewer.config.GoogleOAuthConfig;
+import com.example.gmailviewer.dto.EmailSummaryDto;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.googleapis.json.GoogleJsonError;
@@ -11,9 +12,7 @@ import com.google.api.services.gmail.Gmail;
 import com.google.api.services.gmail.model.ListMessagesResponse;
 import com.google.api.services.gmail.model.Message;
 import jakarta.servlet.http.HttpSession;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -80,7 +79,7 @@ public class GmailService {
      * @param session HTTPセッション
      * @return メール一覧
      */
-    public List<EmailSummary> getEmailList(HttpSession session) {
+    public List<EmailSummaryDto> getEmailList(HttpSession session) {
         if (!isGmailApiAvailable()) {
             log.warn("Gmail APIが利用できません。サンプルデータを返します。");
             return getSampleEmails();
@@ -100,13 +99,13 @@ public class GmailService {
                     .execute();
 
             List<Message> messages = response.getMessages();
-            List<EmailSummary> emailSummaries = new ArrayList<>();
+            List<EmailSummaryDto> emailSummaries = new ArrayList<>();
 
             if (messages != null) {
                 for (Message message : messages) {
                     try {
                         Message fullMessage = service.users().messages().get(user, message.getId()).execute();
-                        EmailSummary summary = createEmailSummary(fullMessage);
+                        EmailSummaryDto summary = createEmailSummary(fullMessage);
                         emailSummaries.add(summary);
                     } catch (GoogleJsonResponseException e) {
                         GoogleJsonError error = e.getDetails();
@@ -129,8 +128,8 @@ public class GmailService {
      * @param message Gmail Message
      * @return EmailSummary
      */
-    private EmailSummary createEmailSummary(Message message) {
-        EmailSummary summary = new EmailSummary();
+    private EmailSummaryDto createEmailSummary(Message message) {
+        EmailSummaryDto summary = new EmailSummaryDto();
         summary.setId(message.getId());
         summary.setThreadId(message.getThreadId());
 
@@ -163,10 +162,10 @@ public class GmailService {
      *
      * @return サンプルメール一覧
      */
-    private List<EmailSummary> getSampleEmails() {
-        List<EmailSummary> samples = new ArrayList<>();
+    private List<EmailSummaryDto> getSampleEmails() {
+        List<EmailSummaryDto> samples = new ArrayList<>();
 
-        EmailSummary sample1 = new EmailSummary();
+        EmailSummaryDto sample1 = new EmailSummaryDto();
         sample1.setId("sample1");
         sample1.setSubject("Gmail Viewerへようこそ");
         sample1.setSender("example@gmail.com");
@@ -174,7 +173,7 @@ public class GmailService {
         sample1.setSnippet("Gmail APIの設定が完了したら、実際のメールが表示されます。GOOGLE_CLIENT_IDとGOOGLE_CLIENT_SECRETを環境変数で設定してください。");
         samples.add(sample1);
 
-        EmailSummary sample2 = new EmailSummary();
+        EmailSummaryDto sample2 = new EmailSummaryDto();
         sample2.setId("sample2");
         sample2.setSubject("設定方法について");
         sample2.setSender("support@example.com");
@@ -182,7 +181,7 @@ public class GmailService {
         sample2.setSnippet("1. Google Cloud Consoleでプロジェクトを作成 2. Gmail APIを有効化 3. OAuth 2.0クライアントIDを作成 4. 環境変数を設定");
         samples.add(sample2);
 
-        EmailSummary sample3 = new EmailSummary();
+        EmailSummaryDto sample3 = new EmailSummaryDto();
         sample3.setId("sample3");
         sample3.setSubject("サンプルメール3");
         sample3.setSender("test@example.com");
@@ -191,19 +190,5 @@ public class GmailService {
         samples.add(sample3);
 
         return samples;
-    }
-
-    /**
-     * メールサマリー情報を格納するクラス
-     */
-    @Setter
-    @Getter
-    public static class EmailSummary {
-        private String id;
-        private String threadId;
-        private String subject;
-        private String sender;
-        private String date;
-        private String snippet;
     }
 }
