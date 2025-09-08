@@ -101,16 +101,18 @@ public class GmailService {
             List<Message> messages = response.getMessages();
             List<EmailSummaryDto> emailSummaries = new ArrayList<>();
 
-            if (messages != null) {
-                for (Message message : messages) {
-                    try {
-                        Message fullMessage = service.users().messages().get(user, message.getId()).execute();
-                        EmailSummaryDto summary = createEmailSummary(fullMessage);
-                        emailSummaries.add(summary);
-                    } catch (GoogleJsonResponseException e) {
-                        GoogleJsonError error = e.getDetails();
-                        log.error("Gmail API エラー: {} - {}", error.getCode(), error.getMessage());
-                    }
+            if (messages == null) {
+                return emailSummaries;
+            }
+
+            for (Message message : messages) {
+                try {
+                    Message fullMessage = service.users().messages().get(user, message.getId()).execute();
+                    EmailSummaryDto summary = createEmailSummary(fullMessage);
+                    emailSummaries.add(summary);
+                } catch (GoogleJsonResponseException e) {
+                    GoogleJsonError error = e.getDetails();
+                    log.error("Gmail API エラー: {} - {}", error.getCode(), error.getMessage());
                 }
             }
 
