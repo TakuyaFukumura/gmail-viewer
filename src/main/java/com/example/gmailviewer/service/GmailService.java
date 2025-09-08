@@ -11,9 +11,7 @@ import com.google.api.services.gmail.Gmail;
 import com.google.api.services.gmail.model.ListMessagesResponse;
 import com.google.api.services.gmail.model.Message;
 import jakarta.servlet.http.HttpSession;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -191,19 +189,5 @@ public class GmailService {
         samples.add(sample3);
 
         return samples;
-    }
-
-    /**
-     * メールサマリー情報を格納するクラス
-     */
-    @Setter
-    @Getter
-    public static class EmailSummary {
-        private String id;
-        private String threadId;
-        private String subject;
-        private String sender;
-        private String date;
-        private String snippet;
     }
 }
