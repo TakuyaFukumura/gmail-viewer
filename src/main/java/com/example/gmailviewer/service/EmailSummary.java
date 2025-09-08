@@ -1,13 +1,11 @@
 package com.example.gmailviewer.service;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
 /**
  * メールサマリー情報を格納するクラス
  */
-@Setter
-@Getter
+@Data
 public class EmailSummary {
     private String id;
     private String threadId;
