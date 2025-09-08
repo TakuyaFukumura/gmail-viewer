@@ -99,29 +99,38 @@ public class GmailService {
                     .execute();
 
             List<Message> messages = response.getMessages();
-            List<EmailSummaryDto> emailSummaries = new ArrayList<>();
-
-            if (messages == null) {
-                return emailSummaries;
-            }
-
-            for (Message message : messages) {
-                try {
-                    Message fullMessage = service.users().messages().get(user, message.getId()).execute();
-                    EmailSummaryDto summary = createEmailSummary(fullMessage);
-                    emailSummaries.add(summary);
-                } catch (GoogleJsonResponseException e) {
-                    GoogleJsonError error = e.getDetails();
-                    log.error("Gmail API エラー: {} - {}", error.getCode(), error.getMessage());
-                }
-            }
-
-            return emailSummaries;
+            return fetchEmailSummaries(service, user, messages);
 
         } catch (IOException | GeneralSecurityException e) {
             log.error("メール一覧取得中にエラーが発生しました", e);
             return getSampleEmails();
         }
+    }
+
+    /**
+     * 指定したメッセージリストからEmailSummaryDtoリストを取得
+     *
+     * @param service  Gmailサービス
+     * @param user     ユーザーID（通常"me"）
+     * @param messages メッセージリスト
+     * @return EmailSummaryDtoリスト
+     */
+    private List<EmailSummaryDto> fetchEmailSummaries(Gmail service, String user, List<Message> messages) throws IOException {
+        List<EmailSummaryDto> emailSummaries = new ArrayList<>();
+        if (messages == null) {
+            return emailSummaries;
+        }
+        for (Message message : messages) {
+            try {
+                Message fullMessage = service.users().messages().get(user, message.getId()).execute();
+                EmailSummaryDto summary = createEmailSummary(fullMessage);
+                emailSummaries.add(summary);
+            } catch (GoogleJsonResponseException e) {
+                GoogleJsonError error = e.getDetails();
+                log.error("Gmail API エラー: {} - {}", error.getCode(), error.getMessage());
+            }
+        }
+        return emailSummaries;
     }
 
     /**
