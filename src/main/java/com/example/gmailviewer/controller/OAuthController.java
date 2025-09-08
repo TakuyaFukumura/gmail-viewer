@@ -1,6 +1,5 @@
 package com.example.gmailviewer.controller;
 
-import com.example.gmailviewer.config.GoogleOAuthConfig;
 import com.example.gmailviewer.service.OAuthService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +20,6 @@ import org.springframework.web.servlet.view.RedirectView;
 public class OAuthController {
 
     private final OAuthService oauthService;
-    private final GoogleOAuthConfig oauthConfig;
 
     /**
      * Google OAuth認証を開始
