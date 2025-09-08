@@ -1,0 +1,16 @@
+package com.example.gmailviewer.dto;
+
+import lombok.Data;
+
+/**
+ * メールサマリー情報を格納するクラス
+ */
+@Data
+public class EmailSummaryDto {
+    private String id;
+    private String threadId;
+    private String subject;
+    private String sender;
+    private String date;
+    private String snippet;
+}
