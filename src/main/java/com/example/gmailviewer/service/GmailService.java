@@ -40,8 +40,6 @@ public class GmailService {
      *
      * @param session HTTPセッション
      * @return Gmail APIクライアント
-     * @throws IOException
-     * @throws GeneralSecurityException
      */
     private Gmail createGmailService(HttpSession session) throws IOException, GeneralSecurityException {
         final NetHttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
