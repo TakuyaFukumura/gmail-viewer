@@ -6,7 +6,7 @@ import lombok.Data;
  * メールサマリー情報を格納するクラス
  */
 @Data
-public class EmailSummary {
+public class EmailSummaryDto {
     private String id;
     private String threadId;
     private String subject;
