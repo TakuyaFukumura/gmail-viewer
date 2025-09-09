@@ -1,14 +1,46 @@
-# basic-spring-boot-app
+# Gmail Viewer
 
-[![Build](https://github.com/TakuyaFukumura/basic-spring-boot-app/workflows/Build/badge.svg)](https://github.com/TakuyaFukumura/basic-spring-boot-app/actions?query=branch%3Amain)
+[![Build](https://github.com/TakuyaFukumura/gmail-viewer/workflows/Build/badge.svg)](https://github.com/TakuyaFukumura/gmail-viewer/actions?query=branch%3Amain)
 [![Java](https://img.shields.io/badge/Java-17-orange)](https://openjdk.java.net/projects/jdk/17/)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.3-brightgreen)](https://spring.io/projects/spring-boot)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.5-brightgreen)](https://spring.io/projects/spring-boot)
 [![Maven](https://img.shields.io/badge/Maven-3.6.3-blue)](https://maven.apache.org/)
 
-SpringBootアプリ開発の元となるリポジトリ
+Gmail APIを使用してGmailのメールを閲覧できるWebアプリケーション
+
+## 機能
+
+- Gmail APIを使用したメール一覧表示
+- Googleアカウントとの OAuth2 認証連携
+- ユーザー登録・ログイン機能
+- H2データベースによるユーザーデータ管理
+- Spring Security による認証・認可機能
+- 開発環境用の認証無効化モード
+
+## Gmail API設定
+
+### 前提条件
+このアプリケーションを使用するには、Google Cloud Consoleでプロジェクトを作成し、Gmail APIを有効化する必要があります。
+
+### Google Cloud Console設定手順
+1. [Google Cloud Console](https://console.cloud.google.com/) にアクセス
+2. 新しいプロジェクトを作成
+3. Gmail APIを有効化
+4. 認証情報（OAuth 2.0 クライアントID）を作成
+5. 認可済みリダイレクトURIに `http://localhost:8080/oauth2/callback` を追加
+
+### 環境変数設定
+作成した認証情報を環境変数に設定してください：
+
+```bash
+export GOOGLE_CLIENT_ID="your-client-id-here"
+export GOOGLE_CLIENT_SECRET="your-client-secret-here"
+export GOOGLE_REDIRECT_URI="http://localhost:8080/oauth2/callback"
+```
 
 ## 資料
-- https://spring.pleiades.io/spring-boot/docs/current/reference/html/getting-started.html
+- [Gmail API Documentation](https://developers.google.com/gmail/api)
+- [Spring Boot Documentation](https://spring.pleiades.io/spring-boot/docs/current/reference/html/getting-started.html)
+- [Google OAuth 2.0 Documentation](https://developers.google.com/identity/protocols/oauth2)
 
 ## Docker開発環境セットアップ
 
@@ -19,10 +51,10 @@ SpringBootアプリ開発の元となるリポジトリ
 ### 起動手順
 1. リポジトリをクローン
     ```bash
-    git clone https://github.com/TakuyaFukumura/basic-spring-boot-app.git
+    git clone https://github.com/TakuyaFukumura/gmail-viewer.git
     ```
     ```bash
-    cd basic-spring-boot-app
+    cd gmail-viewer
     ```
 2. Docker Composeでアプリケーションを起動
     ```bash
@@ -31,12 +63,26 @@ SpringBootアプリ開発の元となるリポジトリ
 3. ブラウザでアクセス
 
     http://localhost:8080
+    
+    初回アクセス時はユーザー登録が必要です。
 
-4. H2データベースコンソールへのアクセス（開発用）
+4. Gmail API設定ページ
+
+    http://localhost:8080/gmail/setup
+    
+    OAuth認証を行い、Gmailへのアクセスを許可してください。
+
+5. メール一覧ページ
+
+    http://localhost:8080/gmail/mails
+    
+    認証完了後、Gmailのメール一覧を表示できます。
+
+6. H2データベースコンソールへのアクセス（開発用）
 
     http://localhost:8080/h2-console
 
-5. ヘルスチェックエンドポイント
+7. ヘルスチェックエンドポイント
 
     http://localhost:8080/actuator/health
 
@@ -74,7 +120,7 @@ docker compose build --no-cache
 ./mvnw clean package
 ```
 ```bash
-java -jar target/myproject.jar
+java -jar target/gmail-viewer.jar
 ```
 
 ## 認証設定
@@ -86,8 +132,9 @@ java -jar target/myproject.jar
 ```bash
 ./mvnw spring-boot:run
 ```
-- ホームページ（`http://localhost:8080`）にアクセスするとログインページにリダイレクトされます
-- デフォルトユーザーでログインできます（詳細はデータベース初期化ファイルを参照）
+- ホームページ（`http://localhost:8080`）にアクセスするとユーザー登録・ログインページが表示されます
+- 新規ユーザーは登録後にログインできます
+- Gmail機能を使用するには追加でOAuth認証が必要です
 
 ### 開発モード（認証無効）
 開発時の利便性のため、`dev`プロファイルでは認証を無効化できます：
@@ -98,10 +145,17 @@ java -jar target/myproject.jar
 - ログインフォームを経由せずに開発やテストが可能
 - H2コンソール（`http://localhost:8080/h2-console`）にもアクセス可能
 
+### Gmail OAuth認証
+Gmail機能を使用するには、アプリケーション内でのユーザー認証とは別に、Google OAuth認証が必要です：
+1. `/gmail/setup` ページでOAuth認証を開始
+2. Googleアカウントでログインし、Gmail読み取り権限を許可
+3. 認証完了後、`/gmail/mails` でメール一覧を表示可能
+
 ### 注意事項
 - 開発モードは **本番環境では絶対に使用しないでください**
 - 開発モードではCSRF保護も無効化されます
 - 本番デプロイ前には必ず認証有効モードでテストしてください
+- Gmail API機能を使用するには有効なGoogle OAuth認証情報が必要です
 
 ## 開発ツール（Spring Boot DevTools）
 
