@@ -16,12 +16,12 @@ class IndexControllerSpec extends Specification {
     def indexController = new IndexController()
     def mockMvc = MockMvcBuilders.standaloneSetup(indexController).build()
 
-    def "GETリクエストでindexページが正しく表示されること"() {
+    def "GETリクエストでgmail/mailsにリダイレクトされること"() {
         when: "ルートパスにGETリクエストを送信"
         def result = mockMvc.perform(get("/"))
 
-        then: "ステータスが200でindexビューが返される"
-        result.andExpect(status().isOk())
-              .andExpect(view().name("index"))
+        then: "ステータスが302でgmail/mailsにリダイレクトされる"
+        result.andExpect(status().isFound())
+              .andExpect(redirectedUrl("/gmail/mails"))
     }
 }

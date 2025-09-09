@@ -10,6 +10,6 @@ public class IndexController {
 
     @GetMapping // Getされた時の処理 Postは別
     public String index() {
-        return "index";
+        return "redirect:/gmail/mails";
     }
 }
