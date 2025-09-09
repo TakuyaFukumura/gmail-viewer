@@ -112,7 +112,7 @@ public class GmailService {
     /**
      * 指定したメッセージリストからEmailSummaryDtoリストを取得
      *
-     * @param gmailClient Gmailサービス
+     * @param gmailClient Gmail APIクライアント
      * @param user        ユーザーID（通常"me"）
      * @param messages    メッセージリスト
      * @return EmailSummaryDtoリスト
