@@ -157,7 +157,7 @@ public class GmailService {
                         summary.setDate(header.getValue());
                         break;
                     default:
-                        // 他のヘッダーは無視
+                        // 他のヘッダー（例: To, Cc, Bcc, Receivedなど）はEmailSummaryの作成には不要なため無視します
                         break;
                 }
             });
