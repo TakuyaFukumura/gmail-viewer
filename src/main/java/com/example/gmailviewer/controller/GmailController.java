@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestParam;
  * Gmail機能用コントローラー
  */
 @Controller
-@RequestMapping("/gmail")
 @RequiredArgsConstructor
 @Slf4j
 public class GmailController {
@@ -31,7 +30,7 @@ public class GmailController {
      * @param authParam 認証成功パラメータ
      * @return メール一覧テンプレート名
      */
-    @GetMapping("/mails")
+    @GetMapping({"/gmail/mails", "/"})
     public String listEmails(Model model, HttpSession session,
                              @RequestParam(value = "auth", required = false) String authParam) {
         log.info("メール一覧画面への請求を受信しました");
@@ -67,7 +66,7 @@ public class GmailController {
      * @param errorParam エラーパラメータ
      * @return 設定画面テンプレート名
      */
-    @GetMapping("/setup")
+    @GetMapping("/gmail/setup")
     public String showSetup(Model model, HttpSession session,
                             @RequestParam(value = "error", required = false) String errorParam) {
         log.info("Gmail API設定画面への請求を受信しました");
