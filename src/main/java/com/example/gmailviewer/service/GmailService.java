@@ -81,7 +81,7 @@ public class GmailService {
      * @param session HTTPセッション
      * @return メール一覧
      */
-    public List<EmailSummaryDto> getEmailList(HttpSession session) {
+    public List<EmailSummaryDto> getEmails(HttpSession session) {
         if (!isGmailApiAvailable()) {
             log.warn("Gmail APIが利用できません。サンプルデータを返します。");
             return createSampleEmails();
