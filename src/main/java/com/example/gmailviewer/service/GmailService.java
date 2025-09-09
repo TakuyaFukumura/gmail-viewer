@@ -84,12 +84,12 @@ public class GmailService {
     public List<EmailSummaryDto> getEmailList(HttpSession session) {
         if (!isGmailApiAvailable()) {
             log.warn("Gmail APIが利用できません。サンプルデータを返します。");
-            return getSampleEmails();
+            return createSampleEmails();
         }
 
         if (!oauthService.isAuthenticated(session)) {
             log.warn("OAuth認証が必要です。サンプルデータを返します。");
-            return getSampleEmails();
+            return createSampleEmails();
         }
 
         try {
@@ -105,7 +105,7 @@ public class GmailService {
 
         } catch (IOException | GeneralSecurityException e) {
             log.error("メール一覧取得中にエラーが発生しました", e);
-            return getSampleEmails();
+            return createSampleEmails();
         }
     }
 
@@ -179,7 +179,7 @@ public class GmailService {
      *
      * @return サンプルメール一覧
      */
-    private List<EmailSummaryDto> getSampleEmails() {
+    private List<EmailSummaryDto> createSampleEmails() {
         List<EmailSummaryDto> samples = new ArrayList<>();
 
         EmailSummaryDto sample1 = new EmailSummaryDto();
