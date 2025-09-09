@@ -61,8 +61,10 @@ public class GmailService {
     public boolean isGmailApiAvailable() {
         try {
             // 必要な設定がすべて存在するかチェック
-            if (oauthConfig.getClientId() == null || oauthConfig.getClientId().equals("your-client-id-here") ||
-                    oauthConfig.getClientSecret() == null || oauthConfig.getClientSecret().equals("your-client-secret-here")) {
+            if (oauthConfig.getClientId() == null ||
+                    oauthConfig.getClientId().equals("your-client-id-here") ||
+                    oauthConfig.getClientSecret() == null ||
+                    oauthConfig.getClientSecret().equals("your-client-secret-here")) {
                 log.warn("Gmail API設定が不完全です。GOOGLE_CLIENT_IDとGOOGLE_CLIENT_SECRETを設定してください。");
                 return false;
             }
@@ -115,7 +117,8 @@ public class GmailService {
      * @param messages メッセージリスト
      * @return EmailSummaryDtoリスト
      */
-    private List<EmailSummaryDto> fetchEmailSummaries(Gmail service, String user, List<Message> messages) throws IOException {
+    private List<EmailSummaryDto> fetchEmailSummaries(Gmail service, String user,
+                                                      List<Message> messages) throws IOException {
         List<EmailSummaryDto> emailSummaries = new ArrayList<>();
         if (messages == null) {
             return emailSummaries;
@@ -184,7 +187,8 @@ public class GmailService {
         sample1.setSubject("Gmail Viewerへようこそ");
         sample1.setSender("example@gmail.com");
         sample1.setDate("2025-01-07 14:00:00");
-        sample1.setSnippet("Gmail APIの設定が完了したら、実際のメールが表示されます。GOOGLE_CLIENT_IDとGOOGLE_CLIENT_SECRETを環境変数で設定してください。");
+        sample1.setSnippet("Gmail APIの設定が完了したら、実際のメールが表示されます。" +
+                "GOOGLE_CLIENT_IDとGOOGLE_CLIENT_SECRETを環境変数で設定してください。");
         samples.add(sample1);
 
         EmailSummaryDto sample2 = new EmailSummaryDto();
@@ -192,7 +196,8 @@ public class GmailService {
         sample2.setSubject("設定方法について");
         sample2.setSender("support@example.com");
         sample2.setDate("2025-01-07 13:30:00");
-        sample2.setSnippet("1. Google Cloud Consoleでプロジェクトを作成 2. Gmail APIを有効化 3. OAuth 2.0クライアントIDを作成 4. 環境変数を設定");
+        sample2.setSnippet("1. Google Cloud Consoleでプロジェクトを作成 2. Gmail APIを有効化 " +
+                "3. OAuth 2.0クライアントIDを作成 4. 環境変数を設定");
         samples.add(sample2);
 
         EmailSummaryDto sample3 = new EmailSummaryDto();
