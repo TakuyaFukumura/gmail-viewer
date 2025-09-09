@@ -42,7 +42,7 @@ public class GmailController {
         }
 
         try {
-            var emails = gmailService.getEmailList(session);
+            var emails = gmailService.getEmails(session);
             model.addAttribute("emails", emails);
             model.addAttribute("apiAvailable", gmailService.isGmailApiAvailable());
             model.addAttribute("authenticated", oauthService.isAuthenticated(session));

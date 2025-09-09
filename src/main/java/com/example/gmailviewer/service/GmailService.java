@@ -40,7 +40,7 @@ public class GmailService {
      * @param session HTTPセッション
      * @return Gmail APIクライアント
      */
-    private Gmail createGmailService(HttpSession session) throws IOException, GeneralSecurityException {
+    private Gmail createGmailClient(HttpSession session) throws IOException, GeneralSecurityException {
         final NetHttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
 
         Credential credential = oauthService.getCredential(session);
@@ -81,43 +81,43 @@ public class GmailService {
      * @param session HTTPセッション
      * @return メール一覧
      */
-    public List<EmailSummaryDto> getEmailList(HttpSession session) {
+    public List<EmailSummaryDto> getEmails(HttpSession session) {
         if (!isGmailApiAvailable()) {
             log.warn("Gmail APIが利用できません。サンプルデータを返します。");
-            return getSampleEmails();
+            return createSampleEmails();
         }
 
         if (!oauthService.isAuthenticated(session)) {
             log.warn("OAuth認証が必要です。サンプルデータを返します。");
-            return getSampleEmails();
+            return createSampleEmails();
         }
 
         try {
-            Gmail service = createGmailService(session);
+            Gmail gmailClient = createGmailClient(session);
             String user = "me";
 
-            ListMessagesResponse response = service.users().messages().list(user)
+            ListMessagesResponse response = gmailClient.users().messages().list(user)
                     .setMaxResults(10L)
                     .execute();
 
             List<Message> messages = response.getMessages();
-            return fetchEmailSummaries(service, user, messages);
+            return fetchEmailSummaries(gmailClient, user, messages);
 
         } catch (IOException | GeneralSecurityException e) {
             log.error("メール一覧取得中にエラーが発生しました", e);
-            return getSampleEmails();
+            return createSampleEmails();
         }
     }
 
     /**
      * 指定したメッセージリストからEmailSummaryDtoリストを取得
      *
-     * @param service  Gmailサービス
-     * @param user     ユーザーID（通常"me"）
-     * @param messages メッセージリスト
+     * @param gmailClient Gmail APIクライアント
+     * @param user        ユーザーID（通常"me"）
+     * @param messages    メッセージリスト
      * @return EmailSummaryDtoリスト
      */
-    private List<EmailSummaryDto> fetchEmailSummaries(Gmail service, String user,
+    private List<EmailSummaryDto> fetchEmailSummaries(Gmail gmailClient, String user,
                                                       List<Message> messages) throws IOException {
         List<EmailSummaryDto> emailSummaries = new ArrayList<>();
         if (messages == null) {
@@ -125,7 +125,7 @@ public class GmailService {
         }
         for (Message message : messages) {
             try {
-                Message fullMessage = service.users().messages().get(user, message.getId()).execute();
+                Message fullMessage = gmailClient.users().messages().get(user, message.getId()).execute();
                 EmailSummaryDto summary = createEmailSummary(fullMessage);
                 emailSummaries.add(summary);
             } catch (GoogleJsonResponseException e) {
@@ -179,7 +179,7 @@ public class GmailService {
      *
      * @return サンプルメール一覧
      */
-    private List<EmailSummaryDto> getSampleEmails() {
+    private List<EmailSummaryDto> createSampleEmails() {
         List<EmailSummaryDto> samples = new ArrayList<>();
 
         EmailSummaryDto sample1 = new EmailSummaryDto();
